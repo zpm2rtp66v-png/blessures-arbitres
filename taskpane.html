@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blessures arbitres CF</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Panneau Excel étroit : alertes en tête, formulaire de déclaration, puis la liste des arbitres suivis */
+:root{
+  --bg:#f3f4f6; --surface:#fff; --ink:#18202b; --muted:#5d6878; --line:#d9dde3;
+  --accent:#d4570f; --accent-ink:#fff; --navy:#1f3864;
+  --due:#c2410c; --due-bg:#fff1e6; --wait:#8a6100; --wait-bg:#fff6d6; --ok:#17733f; --ok-bg:#e3f5ea; --danger:#b42318; --focus:#2f6fde;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif; --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#12161c; --surface:#1b2129; --ink:#e8ecf1; --muted:#9aa5b4; --line:#2e3742;
+  --accent:#f07a35; --accent-ink:#1a0d04; --navy:#8fb0e8;
+  --due:#ff9a5c; --due-bg:#3a2214; --wait:#f1c75b; --wait-bg:#33290f; --ok:#6fd49a; --ok-bg:#15301f; --danger:#ff7a6e; --focus:#7aa7ff; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 var(--body)}
+.wrap{padding:14px 12px 40px;display:grid;gap:14px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;border-bottom:3px solid var(--ink);padding-bottom:8px}
+h1{font:700 1.45rem/1 var(--display);text-transform:uppercase;margin:0}
+h1 span{color:var(--accent)}
+h2{font:700 1.05rem/1.1 var(--display);text-transform:uppercase;letter-spacing:.05em;margin:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:12px;display:grid;gap:10px;min-width:0}
+label{font-weight:600;font-size:.8rem;display:block;margin-bottom:3px}
+.hint{color:var(--muted);font-size:.78rem}
+input[type=text],input[type=date],textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px}
+textarea{min-height:190px;resize:vertical;font-size:.85rem}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button,.btn{font:600 .82rem/1 var(--body);border-radius:6px;padding:8px 11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+button:hover,.btn:hover{border-color:var(--muted)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.navy{background:var(--navy);border-color:var(--navy);color:var(--surface)}
+.big{font:700 1.05rem/1 var(--display);text-transform:uppercase;letter-spacing:.06em;padding:11px 18px;width:100%}
+.link{border:none;background:none;padding:3px 4px;color:var(--muted);text-decoration:underline;font-weight:500}
+.danger{color:var(--danger)}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.chip{padding:4px 8px;font-size:.75rem;border-radius:99px}
+.chip.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.search{position:relative}
+.sugg{position:absolute;z-index:5;left:0;right:0;top:100%;margin-top:3px;background:var(--surface);border:1px solid var(--line);border-radius:7px;max-height:240px;overflow:auto;box-shadow:0 8px 20px rgb(0 0 0 / .18)}
+.sugg button{display:block;width:100%;text-align:left;border:none;border-radius:0;padding:8px 10px;font-weight:500}
+.sugg button:hover,.sugg button.act{background:var(--bg)}
+.sugg small{display:block;color:var(--muted);font-weight:400;margin-top:2px}
+.preview{font-family:ui-monospace,Menlo,monospace;font-size:.78rem;background:var(--bg);border:1px dashed var(--line);border-radius:6px;padding:7px 9px;overflow-wrap:anywhere}
+.due{background:var(--due-bg);border:1px solid var(--due);border-left-width:5px;border-radius:9px;padding:10px 12px;display:grid;gap:8px}
+.name{font:700 1.15rem/1.1 var(--display);letter-spacing:.02em}
+.actions{display:flex;flex-wrap:wrap;gap:6px}
+.copyline{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:.82rem}
+.copyline code{background:var(--bg);padding:4px 6px;border-radius:5px;user-select:all;overflow-wrap:anywhere}
+.card{border:1px solid var(--line);border-radius:8px;padding:9px 10px;display:grid;gap:6px;background:var(--surface)}
+.card-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.72rem;font-weight:600;white-space:nowrap}
+.p-due{background:var(--due-bg);color:var(--due)}.p-wait{background:var(--wait-bg);color:var(--wait)}.p-ok{background:var(--ok-bg);color:var(--ok)}
+.meta{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.edit{display:grid;gap:8px;border-top:1px dashed var(--line);padding-top:8px}
+.status{position:sticky;bottom:0;margin:0 -12px -40px;padding:9px 12px;font-weight:600;font-size:.82rem;border-top:1px solid var(--line);background:var(--surface)}
+.status.ok{color:var(--ok)}.status.err{color:var(--danger)}
+.empty{color:var(--muted);text-align:center;padding:12px;font-size:.85rem}
+details summary{cursor:pointer;color:var(--muted);font-weight:600;font-size:.85rem}
+.check{display:flex;gap:6px;align-items:center;font-size:.8rem;color:var(--muted)}
+.notoffice{padding:24px 16px;display:grid;gap:8px}
+</style>
+</head>
+<body>
+<div class="notoffice" id="notOffice" hidden>
+  <h1>Blessures <span>arbitres CF</span></h1>
+  <p>Ce panneau fonctionne à l'intérieur d'Excel. Ouvre la liste des arbitres CF dans Excel, puis clique sur le bouton « Blessures » de l'onglet Accueil.</p>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <header>
+    <h1>Blessures <span>CF</span></h1>
+    <button class="link" id="btnRefresh" type="button">Actualiser</button>
+  </header>
+
+  <section id="alerts" hidden style="display:grid;gap:8px">
+    <h2 style="color:var(--due)" id="alertsTitle">Retours à souhaiter</h2>
+    <div id="dueList" style="display:grid;gap:8px"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="t-decl">
+    <h2 id="t-decl">Déclarer un blessé</h2>
+    <div class="search">
+      <label for="nom">Arbitre</label>
+      <input type="text" id="nom" autocomplete="off" placeholder="Tape un nom, ex. ACHDDOU">
+      <div class="sugg" id="sugg" hidden role="listbox"></div>
+      <button class="link" type="button" id="btnSel">Prendre l'arbitre de la ligne sélectionnée</button>
+    </div>
+    <div class="row2">
+      <div><label for="dMail">Date du mail</label><input type="date" id="dMail"></div>
+      <div><label for="dRetour">Retour prévu le</label><input type="date" id="dRetour"></div>
+    </div>
+    <div><span class="hint">Durée à partir de la date du mail :</span><div class="chips" id="chips"></div></div>
+    <div><label>Texte écrit dans « Commentaires 26-27 »</label><div class="preview" id="preview"></div></div>
+    <button class="primary big" id="btnBlesse" type="button">Blessé</button>
+  </section>
+
+  <section class="panel" aria-labelledby="t-suivi">
+    <h2 id="t-suivi">En convalescence</h2>
+    <div id="list" style="display:grid;gap:8px"><div class="empty">Aucun arbitre blessé pour l'instant.</div></div>
+    <details id="histo" hidden>
+      <summary id="histoSum">Retours déjà souhaités</summary>
+      <div id="histoList" style="display:grid;gap:8px;margin-top:8px"></div>
+    </details>
+  </section>
+
+  <label class="check"><input type="checkbox" id="autoOpen"> Ouvrir ce panneau automatiquement avec le fichier</label>
+  <div class="status" id="status" role="status">Chargement…</div>
+</div>
+
+<script>
+(() => {
+  const LISTE = "Arb CF 26-27 Liste Alpha";
+  const SUIVI = "Suivi blessures";
+  const L0 = 13;                  // première ligne du tableau de suivi
+  const SIGNATURE = "Lucas";
+  const SUBJECT = "Bon retour sur les terrains !";
+  const $ = id => document.getElementById(id);
+
+  // ---------- dates (numéros de série Excel) ----------
+  const pad = n => String(n).padStart(2, "0");
+  const serialOf = (y, m, d) => Math.round((Date.UTC(y, m - 1, d) - Date.UTC(1899, 11, 30)) / 864e5);
+  const todayS = () => { const n = new Date(); return serialOf(n.getFullYear(), n.getMonth() + 1, n.getDate()); };
+  const dOf = s => new Date(Date.UTC(1899, 11, 30) + s * 864e5);
+  const fr = s => { const d = dOf(s); return pad(d.getUTCDate()) + "/" + pad(d.getUTCMonth() + 1) + "/" + d.getUTCFullYear(); };
+  const isoOf = s => { const d = dOf(s); return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate()); };
+  const fromIso = v => { if (!v) return null; const [y, m, d] = v.split("-").map(Number); return serialOf(y, m, d); };
+  const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+
+  // ---------- texte du commentaire ----------
+  // Une seule mention par blessure, mise à jour à chaque modification
+  const seg = r => "Blessé - mail du " + fr(r.dMail) + " - retour prévu le " + fr(r.retour) + (r.envoye ? " - bon retour souhaité le " + fr(r.envoye) : "");
+  function editComment(com, oldR, newR) {
+    const parts = String(com || "").split(" | ").map(s => s.trim()).filter(Boolean);
+    let i = oldR ? parts.indexOf(seg(oldR)) : -1;
+    if (i < 0 && oldR) i = parts.findIndex(p => p.startsWith("Blessé - mail du " + fr(oldR.dMail)));
+    if (newR) { if (i >= 0) parts[i] = seg(newR); else parts.push(seg(newR)); }
+    else if (i >= 0) parts.splice(i, 1);
+    return parts.join(" | ");
+  }
+
+  // ---------- état ----------
+  let liste = [];        // {i, nom, mail, com}
+  let cols = null;       // index des colonnes dans la liste
+  let suivi = [];        // {row, nom, mail, dMail, retour, envoye}
+  let selected = null;
+  const openMail = new Set(), drafts = new Map();
+  let editing = null, confirmDel = null, busy = false;
+
+  function status(msg, kind) { const s = $("status"); s.textContent = msg; s.className = "status" + (kind ? " " + kind : ""); }
+  function el(tag, props = {}, ...kids) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === "class") e.className = v; else if (k === "text") e.textContent = v;
+      else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v);
+    }
+    for (const k of kids.flat()) if (k != null) e.append(k);
+    return e;
+  }
+  async function copy(t, b) {
+    try { await navigator.clipboard.writeText(t); const o = b.textContent; b.textContent = "Copié"; setTimeout(() => b.textContent = o, 1500); }
+    catch { status("Copie impossible : sélectionne le texte et copie-le à la main.", "err"); }
+  }
+  const prenom = nom => { const p = nom.split(/\s+/).filter(w => w && w !== w.toUpperCase()).join(" "); return p ? p.charAt(0).toUpperCase() + p.slice(1) : nom; };
+  const body = r => "Salut " + prenom(r.nom) + ",\n\nJ'espère que ta convalescence s'est bien passée et que tu es en forme pour reprendre. Je te souhaite un très bon retour sur les terrains !\n\nN'hésite pas à me dire si tu as besoin de quoi que ce soit pour la reprise.\n\nÀ très vite,\n" + SIGNATURE;
+  const mailto = (to, text) => "mailto:" + to + "?subject=" + encodeURIComponent(SUBJECT) + "&body=" + encodeURIComponent(text);
+
+  // ---------- lecture du classeur ----------
+  async function load() {
+    await Excel.run(async ctx => {
+      const ws = ctx.workbook.worksheets.getItemOrNullObject(LISTE);
+      await ctx.sync();
+      if (ws.isNullObject) throw new Error("Onglet « " + LISTE + " » introuvable dans ce fichier.");
+      const head = ws.getRange("A1:FZ1").load("values");
+      const used = ws.getUsedRange(true).load("rowIndex,rowCount");
+      await ctx.sync();
+      cols = { nom: -1, com: -1, mails: [] };
+      head.values[0].forEach((v, i) => {
+        const n = norm(v);
+        if (cols.nom < 0 && n.startsWith("nom prenom")) cols.nom = i;
+        if (cols.com < 0 && n.startsWith("commentaires 26-27")) cols.com = i;
+        if (n === "mail" || n.startsWith("mail pour")) cols.mails.push(i);
+      });
+      if (cols.nom < 0 || cols.com < 0) throw new Error("Colonnes « NOM Prénom » ou « Commentaires 26-27 » introuvables.");
+      const n = used.rowIndex + used.rowCount;
+      const rNom = ws.getRangeByIndexes(0, cols.nom, n, 1).load("values");
+      const rCom = ws.getRangeByIndexes(0, cols.com, n, 1).load("values");
+      const rMails = cols.mails.map(c => ws.getRangeByIndexes(0, c, n, 1).load("values"));
+      const s = ctx.workbook.worksheets.getItemOrNullObject(SUIVI);
+      await ctx.sync();
+      liste = [];
+      for (let i = 1; i < n; i++) {
+        const nom = String(rNom.values[i][0] || "").trim(); if (!nom) continue;
+        let mail = ""; for (const rm of rMails) { const v = String(rm.values[i][0] || "").trim(); if (v.includes("@")) { mail = v; break; } }
+        liste.push({ i, nom, mail, com: String(rCom.values[i][0] || "") });
+      }
+      suivi = [];
+      if (!s.isNullObject) {
+        const v = s.getRange("B" + L0 + ":G1000").load("values");
+        await ctx.sync();
+        v.values.forEach((row, k) => {
+          const nom = String(row[0] || "").trim(); if (!nom) return;
+          suivi.push({ row: L0 + k, nom, mail: String(row[1] || ""), dMail: +row[2] || null, retour: +row[3] || null, envoye: +row[5] || null });
+        });
+      }
+    });
+  }
+
+  async function ensureSuivi(ctx) {
+    let s = ctx.workbook.worksheets.getItemOrNullObject(SUIVI);
+    await ctx.sync();
+    if (!s.isNullObject) return s;
+    s = ctx.workbook.worksheets.add(SUIVI);
+    s.position = 0;
+    s.getRange("B2").values = [["Suivi des arbitres blessés"]];
+    s.getRange("B2").format.font.bold = true; s.getRange("B2").format.font.size = 16;
+    s.getRange("B4").values = [["Géré depuis le panneau « Blessures » (onglet Accueil). Évite de modifier ce tableau à la main."]];
+    s.getRange("B4").format.font.color = "#6B7280";
+    const h = s.getRange("B" + (L0 - 1) + ":H" + (L0 - 1));
+    h.values = [["Arbitre", "Mail", "Mail du", "Retour prévu", "Statut", "Bon retour envoyé le", "Mail de bon retour"]];
+    h.format.fill.color = "#1F3864"; h.format.font.color = "#FFFFFF"; h.format.font.bold = true; h.format.wrapText = true;
+    const nRows = 1000 - L0 + 1;
+    s.getRange("D" + L0 + ":E1000").numberFormat = Array.from({ length: nRows }, () => ["dd/mm/yyyy", "dd/mm/yyyy"]);
+    s.getRange("G" + L0 + ":G1000").numberFormat = Array.from({ length: nRows }, () => ["dd/mm/yyyy"]);
+    const st = s.getRange("F" + L0 + ":F1000");
+    for (const [t, c] of [["Retour à souhaiter", "#FFC780"], ["En convalescence", "#FFEB9C"], ["Message envoyé", "#C6EFCE"]]) {
+      const cf = st.conditionalFormats.add(Excel.ConditionalFormatType.cellValue);
+      cf.cellValue.format.fill.color = c;
+      cf.cellValue.rule = { formula1: '="' + t + '"', operator: "EqualTo" };
+    }
+    s.getRange("B:B").format.columnWidth = 190; s.getRange("C:C").format.columnWidth = 200;
+    s.getRange("D:E").format.columnWidth = 90; s.getRange("F:F").format.columnWidth = 130; s.getRange("G:H").format.columnWidth = 120;
+    await ctx.sync();
+    return s;
+  }
+
+  function writeSuiviRow(s, r, rec) {
+    s.getRange("B" + r + ":E" + r).values = [[rec.nom, rec.mail || "", rec.dMail, rec.retour]];
+    s.getRange("F" + r).formulas = [['=IF(G' + r + '<>"","Message envoyé",IF(E' + r + '<=TODAY(),"Retour à souhaiter","En convalescence"))']];
+    s.getRange("G" + r).values = [[rec.envoye || ""]];
+    if (rec.mail) s.getRange("H" + r).hyperlink = { address: mailto(rec.mail, body(rec)), textToDisplay: "Écrire le mail" };
+  }
+
+  // Applique une modification : commentaire de la liste + onglet de suivi, en une fois
+  async function apply(oldR, newR, okMsg) {
+    if (busy) return; busy = true; status("Enregistrement dans Excel…");
+    try {
+      await load();                                   // repartir de l'état réel du fichier
+      const nom = (newR || oldR).nom;
+      const row = liste.find(x => x.nom === nom);
+      if (!row) throw new Error(nom + " introuvable dans l'onglet " + LISTE + ".");
+      await Excel.run(async ctx => {
+        const ws = ctx.workbook.worksheets.getItem(LISTE);
+        const cell = ws.getCell(row.i, cols.com);
+        cell.values = [[editComment(row.com, oldR, newR)]];
+        const s = await ensureSuivi(ctx);
+        if (oldR && !newR) {
+          s.getRange("B" + oldR.row + ":H" + oldR.row).delete("Up");
+        } else {
+          let r = oldR ? oldR.row : null;
+          if (!r) { r = L0; const used = suivi.map(x => x.row); while (used.includes(r)) r++; }
+          writeSuiviRow(s, r, newR);
+        }
+        await ctx.sync();
+      });
+      await load(); render();
+      status(okMsg, "ok");
+    } catch (e) { status(e.message || "La modification a échoué.", "err"); }
+    finally { busy = false; }
+  }
+
+  // ---------- actions ----------
+  function current(nom) { return suivi.find(r => r.nom === nom && !r.envoye); }
+
+  async function declare() {
+    const typed = $("nom").value.trim();
+    const row = selected && selected.nom === typed ? selected : liste.find(x => norm(x.nom) === norm(typed));
+    if (!row) return status("Choisis un arbitre dans la liste proposée.", "err");
+    const dMail = fromIso($("dMail").value), retour = fromIso($("dRetour").value);
+    if (!dMail) return status("Indique la date du mail.", "err");
+    if (!retour) return status("Indique la date de retour prévue.", "err");
+    if (retour < dMail) return status("La date de retour est avant la date du mail.", "err");
+    const old = current(row.nom);
+    const rec = { nom: row.nom, mail: row.mail, dMail: old ? old.dMail : dMail, retour, envoye: null };
+    await apply(old || null, rec, old ? "Retour de " + row.nom + " mis à jour au " + fr(retour) + "." : row.nom + " noté blessé, commentaire mis à jour.");
+    if ($("status").classList.contains("ok")) { $("nom").value = ""; $("dRetour").value = ""; selected = null; $("dMail").value = isoOf(todayS()); renderPreview(); }
+  }
+
+  async function fromSelection() {
+    try {
+      await Excel.run(async ctx => {
+        const r = ctx.workbook.getSelectedRange().load("rowIndex"); const w = ctx.workbook.worksheets.getActiveWorksheet().load("name");
+        await ctx.sync();
+        if (w.name !== LISTE) { status("Sélectionne d'abord une cellule sur la ligne de l'arbitre, dans l'onglet " + LISTE + ".", "err"); return; }
+        const row = liste.find(x => x.i === r.rowIndex);
+        if (!row) { status("Aucun arbitre sur la ligne sélectionnée.", "err"); return; }
+        pick(row);
+      });
+    } catch (e) { status(e.message, "err"); }
+  }
+
+  async function showRow(nom) {
+    const row = liste.find(x => x.nom === nom); if (!row) return;
+    await Excel.run(async ctx => { const ws = ctx.workbook.worksheets.getItem(LISTE); ws.activate(); ws.getCell(row.i, cols.com).select(); await ctx.sync(); });
+  }
+
+  // ---------- rendu ----------
+  function renderPreview() {
+    const nom = $("nom").value.trim(); const old = nom && current(liste.find(x => norm(x.nom) === norm(nom))?.nom);
+    const dm = old ? old.dMail : fromIso($("dMail").value), dr = fromIso($("dRetour").value);
+    $("preview").textContent = "Blessé - mail du " + (dm ? fr(dm) : "…") + " - retour prévu le " + (dr ? fr(dr) : "…");
+    $("btnBlesse").textContent = old ? "Mettre à jour le retour" : "Blessé";
+    for (const c of $("chips").children) c.classList.toggle("on", !!$("dMail").value && $("dRetour").value === isoOf(fromIso($("dMail").value) + 7 * +c.dataset.w));
+  }
+
+  function card(r, isDue) {
+    const t = todayS(), d = r.retour - t;
+    const pill = r.envoye ? el("span", { class: "pill p-ok", text: "Bon retour souhaité" })
+      : r.retour <= t ? el("span", { class: "pill p-due", text: "Retour à souhaiter" })
+      : el("span", { class: "pill p-wait", text: "Encore " + d + " j" });
+    const c = el("div", { class: isDue ? "due" : "card" },
+      el("div", { class: "card-top" },
+        el("div", {}, el("div", { class: "name", text: r.nom }),
+          el("div", { class: "meta", text: "Mail du " + fr(r.dMail) + " · retour " + fr(r.retour) + (r.envoye ? " · souhaité le " + fr(r.envoye) : "") })),
+        pill));
+    const key = r.row;
+    if (isDue) {
+      c.append(el("div", { class: "actions" },
+        el("button", { class: "primary", type: "button", text: openMail.has(key) ? "Fermer le mail" : "Écrire le mail", onclick: () => { openMail.has(key) ? openMail.delete(key) : openMail.add(key); render(); } }),
+        el("button", { class: "navy", type: "button", text: "Bon retour envoyé", onclick: () => apply(r, { ...r, envoye: todayS() }, "Bon retour noté pour " + r.nom + ".") })));
+      if (openMail.has(key)) {
+        if (!drafts.has(key)) drafts.set(key, body(r));
+        const ta = el("textarea", { "aria-label": "Message" }); ta.value = drafts.get(key);
+        const a = el("a", { class: "btn", href: mailto(r.mail, ta.value), target: "_blank", rel: "noopener", text: "Ouvrir dans Outlook" });
+        ta.addEventListener("input", () => { drafts.set(key, ta.value); a.href = mailto(r.mail, ta.value); });
+        const b1 = el("button", { type: "button", text: "Copier" }); b1.onclick = () => copy(r.mail, b1);
+        const b2 = el("button", { type: "button", text: "Copier le message" }); b2.onclick = () => copy(ta.value, b2);
+        c.append(el("div", { class: "copyline" }, el("b", { text: "À :" }), r.mail ? el("code", { text: r.mail }) : el("span", { class: "hint", text: "mail inconnu" }), r.mail ? b1 : null),
+          el("div", { class: "copyline" }, el("b", { text: "Objet :" }), el("code", { text: SUBJECT })), ta, el("div", { class: "actions" }, b2, a));
+      }
+      return c;
+    }
+    const acts = el("div", { class: "actions" });
+    if (editing === key) {
+      const i1 = el("input", { type: "date", "aria-label": "Date du mail" }); i1.value = isoOf(r.dMail);
+      const i2 = el("input", { type: "date", "aria-label": "Retour prévu" }); i2.value = isoOf(r.retour);
+      c.append(el("div", { class: "edit" },
+        el("div", { class: "row2" }, el("div", {}, el("label", { text: "Date du mail" }), i1), el("div", {}, el("label", { text: "Retour prévu le" }), i2)),
+        el("div", { class: "actions" },
+          el("button", { class: "primary", type: "button", text: "Enregistrer", onclick: () => {
+            const dm = fromIso(i1.value), dr = fromIso(i2.value);
+            if (!dm || !dr || dr < dm) return status("Vérifie les dates.", "err");
+            editing = null; apply(r, { ...r, dMail: dm, retour: dr }, "Dates de " + r.nom + " mises à jour.");
+          } }),
+          el("button", { class: "link", type: "button", text: "Annuler", onclick: () => { editing = null; render(); } }))));
+      return c;
+    }
+    if (confirmDel === key) {
+      acts.append(el("span", { class: "hint", text: "Supprimer cette blessure (et sa mention dans le commentaire) ?" }),
+        el("button", { class: "link danger", type: "button", text: "Oui", onclick: () => { confirmDel = null; apply(r, null, "Blessure de " + r.nom + " supprimée."); } }),
+        el("button", { class: "link", type: "button", text: "Non", onclick: () => { confirmDel = null; render(); } }));
+    } else {
+      if (r.envoye) acts.append(el("button", { class: "link", type: "button", text: "Annuler le bon retour", onclick: () => apply(r, { ...r, envoye: null }, "Bon retour annulé pour " + r.nom + ".") }));
+      else acts.append(el("button", { class: "link", type: "button", text: "Modifier les dates", onclick: () => { editing = key; confirmDel = null; render(); } }));
+      acts.append(el("button", { class: "link", type: "button", text: "Voir la ligne", onclick: () => showRow(r.nom) }),
+        el("button", { class: "link danger", type: "button", text: "Supprimer", onclick: () => { confirmDel = key; editing = null; render(); } }));
+    }
+    c.append(acts);
+    return c;
+  }
+
+  function render() {
+    const t = todayS();
+    const due = suivi.filter(r => !r.envoye && r.retour && r.retour <= t).sort((a, b) => a.retour - b.retour);
+    $("alerts").hidden = !due.length;
+    $("alertsTitle").textContent = due.length > 1 ? due.length + " retours à souhaiter" : "1 retour à souhaiter";
+    $("dueList").replaceChildren(...due.map(r => card(r, true)));
+    const act = suivi.filter(r => !r.envoye).sort((a, b) => a.retour - b.retour);
+    $("list").replaceChildren(...(act.length ? act.map(r => card(r, false)) : [el("div", { class: "empty", text: "Aucun arbitre en convalescence." })]));
+    const done = suivi.filter(r => r.envoye).sort((a, b) => b.envoye - a.envoye);
+    $("histo").hidden = !done.length; $("histoSum").textContent = "Retours déjà souhaités (" + done.length + ")";
+    $("histoList").replaceChildren(...done.map(r => card(r, false)));
+    renderPreview();
+  }
+
+  // ---------- suggestions ----------
+  let sIdx = -1, sRows = [];
+  function renderSugg() {
+    const box = $("sugg"); const q = norm($("nom").value); sIdx = -1;
+    if (q.length < 2) { box.hidden = true; return; }
+    sRows = liste.filter(r => norm(r.nom).includes(q)).slice(0, 12);
+    box.replaceChildren(...(sRows.length ? sRows.map((r, i) => el("button", { type: "button", role: "option", onmousedown: e => { e.preventDefault(); pick(sRows[i]); } },
+      r.nom, el("small", { text: (r.mail || "mail inconnu") + (r.com ? " · " + r.com.slice(0, 60) : "") }))) : [el("div", { class: "empty", text: "Aucun arbitre ne correspond." })]));
+    box.hidden = false;
+  }
+  function pick(r) {
+    selected = r; $("nom").value = r.nom; $("sugg").hidden = true;
+    const old = current(r.nom);
+    if (old) { $("dRetour").value = isoOf(old.retour); status(r.nom + " est déjà en convalescence : change la date de retour pour la mettre à jour."); }
+    renderPreview();
+  }
+
+  // ---------- démarrage ----------
+  async function refresh() {
+    status("Lecture du fichier…");
+    try { await load(); render(); status(liste.length + " arbitres lus · " + suivi.filter(r => !r.envoye).length + " en convalescence.", "ok"); }
+    catch (e) { status(e.message || "Lecture impossible.", "err"); }
+  }
+
+  function init() {
+    $("app").hidden = false;
+    $("dMail").value = isoOf(todayS());
+    for (const w of [1, 2, 3, 4, 6, 8]) $("chips").append(el("button", { type: "button", class: "chip", "data-w": w, text: "+" + w + " sem.", onclick: () => {
+      if (!$("dMail").value) $("dMail").value = isoOf(todayS());
+      $("dRetour").value = isoOf(fromIso($("dMail").value) + 7 * w); renderPreview(); } }));
+    $("nom").addEventListener("input", () => { selected = null; renderSugg(); renderPreview(); });
+    $("nom").addEventListener("blur", () => setTimeout(() => $("sugg").hidden = true, 150));
+    $("nom").addEventListener("keydown", e => {
+      const b = [...$("sugg").querySelectorAll("button")]; if ($("sugg").hidden || !b.length) return;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); sIdx = (sIdx + (e.key === "ArrowDown" ? 1 : -1) + b.length) % b.length; b.forEach((x, i) => x.classList.toggle("act", i === sIdx)); }
+      if (e.key === "Enter") { e.preventDefault(); pick(sRows[sIdx < 0 ? 0 : sIdx]); }
+      if (e.key === "Escape") $("sugg").hidden = true;
+    });
+    $("dMail").addEventListener("change", renderPreview); $("dRetour").addEventListener("change", renderPreview);
+    $("btnBlesse").addEventListener("click", declare);
+    $("btnSel").addEventListener("click", fromSelection);
+    $("btnRefresh").addEventListener("click", refresh);
+    // ouverture automatique du panneau avec le fichier
+    try {
+      const st = Office.context.document.settings;
+      if (st.get("blessures.init") !== true) { st.set("Office.AutoShowTaskpaneWithDocument", true); st.set("blessures.init", true); st.saveAsync(); }
+      $("autoOpen").checked = st.get("Office.AutoShowTaskpaneWithDocument") === true;
+      $("autoOpen").addEventListener("change", () => { st.set("Office.AutoShowTaskpaneWithDocument", $("autoOpen").checked); st.saveAsync(); });
+    } catch { $("autoOpen").closest("label").hidden = true; }
+    refresh();
+  }
+
+  if (window.Office) Office.onReady(info => { if (info.host === Office.HostType.Excel) init(); else $("notOffice").hidden = false; });
+  else $("notOffice").hidden = false;
+})();
+</script>
+</body>
+</html>
